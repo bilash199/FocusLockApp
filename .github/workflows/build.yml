@@ -18,17 +18,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew || true
+      - name: Build with Gradle
+        run: gradle build
 
-      - name: Build APK with Gradle Wrapper
+      - name: Create APK Copy Directory
         run: |
-          ./gradlew assembleDebug || gradle assembleDebug || gradle build
+          mkdir -p apk_output
+          find . -name "*.apk" -exec cp {} apk_output/ \;
 
-      - name: Find and Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: FocusLock-APK
-          path: |
-            **/build/outputs/apk/**/*.apk
-            **/*.apk
+          path: apk_output/*.apk
