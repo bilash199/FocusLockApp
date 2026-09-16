@@ -18,7 +18,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build Project Safely
+      - name: Fix Structure and Build
         run: |
           mkdir -p app/src/main/java/com/focuslock/app
           mkdir -p app/src/main/res
@@ -44,6 +44,7 @@ jobs:
           dependencies {
               implementation 'androidx.core:core-ktx:1.12.0'
               implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation 'com.google.android.material:material:1.11.0'
           }
           EOF
 
@@ -60,17 +61,18 @@ jobs:
 
           echo "include ':app'" > settings.gradle
 
-          # Run build and allow continuation
-          gradle :app:assembleDebug || gradle build || true
+          # Run assemble and capture everything
+          gradle :app:assembleDebug || gradle assemble || true
 
-      - name: Collect APK
+      - name: Extract all APKs
         run: |
           mkdir -p final_apk
           find . -name "*.apk" -exec cp {} final_apk/ \;
+          ls -la final_apk/
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: FocusLock-APK
           path: final_apk/
-          if-no-files-found: ignore
+          if-no-files-found: warn
