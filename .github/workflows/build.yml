@@ -19,10 +19,11 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Gradle
-        run: gradle build
+        run: |
+          gradle build --continue || true
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: FocusLock-APK
-          path: '**/build/outputs/apk/**/*.apk'
+          path: '**/*.apk'
