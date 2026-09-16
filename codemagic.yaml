@@ -8,5 +8,5 @@ workflows:
         script: |
           gradle build
     artifacts:
-      - app/build/outputs/apk/**/*.apk
-      - build/outputs/apk/**/*.apk
+      - app/build/outputs/apk/debug/*.apk
+      - app/build/outputs/apk/release/*.apk
