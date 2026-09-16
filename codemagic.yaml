@@ -12,6 +12,7 @@ workflows:
     artifacts:
       - apk_output/*.apk
     publishing:
-      email:
-        recipients:
-          - bilashhossen8989@gmail.com
+      github_releases:
+        events:
+          - push
+        prerelease: false
