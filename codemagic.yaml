@@ -7,8 +7,9 @@ workflows:
       - name: Build Android APK
         script: |
           gradle build
+          find . -name "*.apk"
     artifacts:
-      - "**/build/outputs/**/*.apk"
+      - "**/outputs/**/*.apk"
       - "**/*.apk"
     publishing:
       email:
