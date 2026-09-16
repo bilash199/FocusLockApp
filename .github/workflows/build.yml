@@ -12,27 +12,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Build APK safely
+      - name: Restructure Project & Fix Imports
         run: |
           mkdir -p app/src/main/java/com/focuslock/app
           mkdir -p app/src/main/res
           
-          # Move files safely
+          # Move files
           cp *.kt app/src/main/java/com/focuslock/app/ 2>/dev/null || true
           cp AndroidManifest.xml app/src/main/ 2>/dev/null || true
           cp -r res/* app/src/main/res/ 2>/dev/null || true
 
-          # Create build configuration
+          # Inject package header to all Kotlin files if missing
+          for file in app/src/main/java/com/focuslock/app/*.kt; do
+            if ! grep -q "package com.focuslock.app" "$file"; then
+              sed -i '1s/^/package com.focuslock.app\n\n/' "$file"
+            fi
+          done
+
+          # Create app/build.gradle
           cat << 'EOF' > app/build.gradle
           plugins {
               id 'com.android.application'
-              id 'kotlin-android'
+              id 'org.jetbrains.kotlin.android'
           }
           android {
               namespace 'com.focuslock.app'
@@ -44,13 +45,22 @@ jobs:
                   versionCode 1
                   versionName "1.0"
               }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+              kotlinOptions {
+                  jvmTarget = '17'
+              }
           }
           dependencies {
               implementation 'androidx.core:core-ktx:1.12.0'
               implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation 'com.google.android.material:material:1.11.0'
           }
           EOF
 
+          # Create root build.gradle
           cat << 'EOF' > build.gradle
           buildscript {
               repositories { google(); mavenCentral() }
@@ -64,16 +74,22 @@ jobs:
 
           echo "include ':app'" > settings.gradle
 
-          # Run build ignoring non-critical issues
-          gradle :app:assembleDebug --continue || true
-          
-          # Collect any generated APK
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Debug APK
+        run: gradle :app:assembleDebug
+
+      - name: Collect Output APK
+        run: |
           mkdir -p final_apk
-          find . -name "*.apk" -exec cp {} final_apk/ \;
+          cp app/build/outputs/apk/debug/*.apk final_apk/
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: FocusLock-APK
-          path: final_apk/
-          if-no-files-found: warn
+          path: final_apk/*.apk
