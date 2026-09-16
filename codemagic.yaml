@@ -6,11 +6,10 @@ workflows:
     scripts:
       - name: Build Android APK
         script: |
-          gradle build
+          gradle assembleDebug
     artifacts:
+      - app/build/outputs/apk/debug/*.apk
       - app/build/outputs/apk/**/*.apk
-      - app/build/**/*.apk
-      - build/**/*.apk
     publishing:
       email:
         recipients:
