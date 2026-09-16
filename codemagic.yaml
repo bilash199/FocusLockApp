@@ -6,10 +6,11 @@ workflows:
     scripts:
       - name: Build Android APK
         script: |
-          gradle :app:assembleDebug || gradle assemble
+          gradle build
+          mkdir -p apk_output
+          find . -name "*.apk" -exec cp {} apk_output/ \;
     artifacts:
-      - "**/build/outputs/apk/**/*.apk"
-      - "**/*.apk"
+      - apk_output/*.apk
     publishing:
       email:
         recipients:
