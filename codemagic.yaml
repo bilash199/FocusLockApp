@@ -8,8 +8,8 @@ workflows:
         script: |
           gradle build
     artifacts:
-      - app/build/**/*.apk
-      - build/**/*.apk
+      - "**/build/outputs/**/*.apk"
+      - "**/*.apk"
     publishing:
       email:
         recipients:
